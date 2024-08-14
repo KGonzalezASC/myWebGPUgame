@@ -1,0 +1,181 @@
+ // async drawSpriteFX(device: GPUDevice) {
+    //     const effects = this.effectFactory.effects;
+    //
+    //     // Initialize two textures for ping-pong rendering
+    //     const pingTexture = await Texture.createEmptyTexture(device, 1024, 1024);
+    //     const pongTexture = await Texture.createEmptyTexture(device, 1024, 1024);
+    //
+    //     let currentTexture = this.shaderSpriteTexture!;
+    //     let pingPongToggle = true;
+    //
+    //     for (const effect of effects) {
+    //         effect.updateScreenTexture!(currentTexture);
+    //
+    //         // Toggle between ping and pong textures
+    //         const tempTexture = pingPongToggle ? pingTexture : pongTexture;
+    //         const tempTextureView = tempTexture.texture.createView();
+    //
+    //         // Apply the effect
+    //         effect.draw(tempTextureView, true);
+    //
+    //         // Update currentTexture to be the output of the current effect
+    //         currentTexture = tempTexture;
+    //         pingPongToggle = !pingPongToggle;
+    //     }
+    //
+    //     // Apply the last effect output to the sprite texture
+    //     const finalEffect = effects[effects.length - 1];
+    //     finalEffect.updateScreenTexture!(currentTexture);
+    //     finalEffect.draw(this.sprite.texture!.texture.createView(), true);
+    // }
+
+    //does not work with bloomFX so far no chaining of effects
+    // async drawSpriteFX() {
+    //     const effect = this.effectFactory.getEffect(0);
+    //     //update the screen texture with the sprite texture so it doesn't get overwritten
+    //     effect.updateScreenTexture!(this.shaderSpriteTexture!);
+    //     //overrite the sprite texture view by apply textureFX to the sprite texture
+    //     effect.draw(this.sprite.texture!.texture.createView(),true);
+    // }
+
+    //TODO scrap?
+    // async drawTextureFX(device: GPUDevice) {
+    //     const effect = this.effectFactory.getEffect(0);
+    //     effect.draw(this.effectTexture!.texture.createView());
+    //     //use player.sprite.texture and effectTexture in a shader to combine them
+    //
+    //     //make pipeline for the applySpriteFX.wgsl which will combine the two textures
+    //     const shaderModule = device.createShaderModule({
+    //         code: shaderSource,
+    //     });
+    //     const gpuBuffer = BufferUtils.createVertexBuffer(device, new Float32Array([
+    //             //pos (x,y)  texCoord (u,v)
+    //             // top left
+    //             -1.0, 1.0, 0.0, 0.0,
+    //             // top right
+    //             1.0, 1.0, 1.0, 0.0,
+    //             // bottom left
+    //             -1.0, -1.0, 0.0, 1.0,
+    //             // second triangle
+    //             // bottom left
+    //             -1.0, -1.0, 0.0, 1.0,
+    //             // top right
+    //             1.0, 1.0, 1.0, 0.0,
+    //             // bottom right
+    //             1.0, -1.0, 1.0, 1.0
+    //         ]));
+    //     const interleaveBufferLayout: GPUVertexBufferLayout = {
+    //         //arraystride describe a single vertex
+    //         arrayStride: 4 * Float32Array.BYTES_PER_ELEMENT,  // 7 floats per vertex (x, y, u, v, r, g, b) * 4 bytes per float
+    //         stepMode: 'vertex',  // move to the next vertex after processing 1 vertex
+    //         attributes: [
+    //             { shaderLocation: 0, //should be consistent with location in shader
+    //                 offset: 0,
+    //                 format: 'float32x2' // 2 floats per vertex (x, y)
+    //             },
+    //             { shaderLocation: 1, offset: 2 * Float32Array.BYTES_PER_ELEMENT, format: 'float32x2' },
+    //         ],
+    //     };
+    //     const vertexState: GPUVertexState = {
+    //         module: shaderModule,
+    //         entryPoint: 'vertexMain',
+    //         buffers: [interleaveBufferLayout],
+    //     };
+    //     const fragmentState: GPUFragmentState = {
+    //         module: shaderModule,
+    //         entryPoint: 'fragmentMain',
+    //         targets: [
+    //             {
+    //                 format: "bgra8unorm",
+    //                 blend: {
+    //                     color: {
+    //                         srcFactor: 'src-alpha',
+    //                         dstFactor: 'one-minus-src-alpha',
+    //                         operation: 'add',
+    //                     },
+    //                     alpha: {
+    //                         srcFactor: 'one',
+    //                         dstFactor: 'zero',
+    //                         operation: 'add',
+    //                     },
+    //                 },
+    //
+    //             }
+    //         ]
+    //     };
+    //     const textureBindGroupLayout = device.createBindGroupLayout({
+    //         entries: [
+    //             {
+    //                 binding: 0,
+    //                 visibility: GPUShaderStage.FRAGMENT,
+    //                 sampler: {}
+    //             },
+    //             {
+    //                 binding: 1,
+    //                 visibility: GPUShaderStage.FRAGMENT,
+    //                 texture: {}
+    //             }
+    //         ]
+    //     });
+    //
+    //     const spriteTextureBindGroup = device.createBindGroup({
+    //         layout: textureBindGroupLayout,
+    //         entries: [
+    //             {
+    //                 binding: 0,
+    //                 resource: this.shaderSpriteTexture!.sampler,
+    //             },
+    //             {
+    //                 binding: 1,
+    //                 resource:  this.shaderSpriteTexture!.texture.createView() //we need a copy of the texture to avoid synchronization issues
+    //             }
+    //         ]
+    //     });
+    //
+    //     const effectTextureBindGroup = device.createBindGroup({
+    //         layout: textureBindGroupLayout,
+    //         entries: [
+    //             {
+    //                 binding: 0,
+    //                 resource: this.effectTexture!.sampler
+    //             },
+    //             {
+    //                 binding: 1,
+    //                 resource: this.effectTexture!.texture.createView()
+    //             }
+    //         ]
+    //     });
+    //
+    //     const pipeline = device.createRenderPipeline({
+    //         layout: device.createPipelineLayout({
+    //             bindGroupLayouts: [
+    //                 textureBindGroupLayout,
+    //                 textureBindGroupLayout
+    //             ],
+    //         }),
+    //         vertex: vertexState,
+    //         fragment: fragmentState,
+    //         primitive: {
+    //             topology: 'triangle-list',
+    //         },
+    //     });
+    //
+    //     const commandEncoder = device.createCommandEncoder();
+    //     const passEncoder = commandEncoder.beginRenderPass({
+    //         colorAttachments: [
+    //             {
+    //                 //overwriting the texture view with the combined texture of the shaderSpriteTexture and effectTexture
+    //                 view:this.sprite.texture!.texture.createView(),
+    //                 loadOp: 'clear',
+    //                 storeOp: 'store',
+    //             },
+    //         ],
+    //     });
+    //     passEncoder.setPipeline(pipeline);
+    //     passEncoder.setVertexBuffer(0, gpuBuffer);
+    //     passEncoder.setBindGroup(0, spriteTextureBindGroup);
+    //     passEncoder.setBindGroup(1, effectTextureBindGroup);
+    //     passEncoder.draw(6, 1, 0, 0);
+    //     passEncoder.end();
+    //     device.queue.submit([commandEncoder.finish()]);
+    // }
